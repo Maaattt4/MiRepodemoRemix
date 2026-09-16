@@ -56,7 +56,7 @@ export default function App() {
         <Drawer.Screen name="Home" component={HomeScreen} options={{ title: 'Inicio' }} />
         <Drawer.Screen name="Dados" component={Dados} options={{ title: 'Lanzar Dados' }} />
         <Drawer.Screen name="Gato" component={Gato} options={{ title: 'Tic Tac Toe' }} />
-        <Drawer.Screen name="Utilidades" component={UtilidadesTab} options={{ title: 'IMC' }} />
+        <Drawer.Screen name="Utilidades" component={UtilidadesTab} options={{ title: 'IMC y Propinas' }} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
