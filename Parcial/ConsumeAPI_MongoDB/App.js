@@ -9,18 +9,42 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
+  TextInput,
 } from 'react-native';
 
 export default function App() {
+  // ----------------------------------------------------
+  // ESTADOS DE LOGIN
+  // ----------------------------------------------------
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+
+  // ----------------------------------------------------
+  // ESTADOS DE PELÍCULAS
+  // ----------------------------------------------------
   const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  
-  // Estados para el Modal
+  const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
 
-  useEffect(() => {
-    fetch('http://localhost:4000/movies')
+  // Función para manejar el inicio de sesión
+  const handleLogin = () => {
+    // Aquí validas tu usuario (puedes cambiar "admin" y "1234")
+    if (username === 'admin' && password === '1234') {
+      setLoginError('');
+      setIsLoggedIn(true);
+      fetchMovies(); // Cargamos las películas solo si inicia sesión
+    } else {
+      setLoginError('Usuario o contraseña incorrectos');
+    }
+  };
+
+  // Función para obtener las películas
+  const fetchMovies = () => {
+    setLoading(true);
+    fetch('http://localhost:4000/movies') // Recuerda usar tu IP si estás en celular físico
       .then((res) => res.json())
       .then((data) => {
         setMovies(data);
@@ -30,8 +54,54 @@ export default function App() {
         console.error(error);
         setLoading(false);
       });
-  }, []);
+  };
 
+  // Función para abrir el modal
+  const openModal = (movie) => {
+    setSelectedMovie(movie);
+    setModalVisible(true);
+  };
+
+  // ----------------------------------------------------
+  // PANTALLA DE LOGIN
+  // ----------------------------------------------------
+  if (!isLoggedIn) {
+    return (
+      <View style={styles.loginContainer}>
+        <View style={styles.loginCard}>
+          <Text style={styles.loginTitle}>Bienvenido</Text>
+          
+          <TextInput
+            style={styles.input}
+            placeholder="Usuario"
+            placeholderTextColor="#888"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+          />
+          
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor="#888"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry // Oculta los caracteres
+          />
+
+          {loginError ? <Text style={styles.errorText}>{loginError}</Text> : null}
+
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>Ingresar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  // ----------------------------------------------------
+  // PANTALLA PRINCIPAL (PELÍCULAS)
+  // ----------------------------------------------------
   if (loading) {
     return (
       <View style={styles.loader}>
@@ -40,14 +110,7 @@ export default function App() {
     );
   }
 
-  // Función para abrir el modal con la info de la película
-  const openModal = (movie) => {
-    setSelectedMovie(movie);
-    setModalVisible(true);
-  };
-
   const renderItem = ({ item }) => (
-    // Cambiamos View por TouchableOpacity para que reaccione al toque
     <TouchableOpacity 
       style={styles.card} 
       activeOpacity={0.7} 
@@ -61,7 +124,7 @@ export default function App() {
         </View>
       )}
       <View style={styles.info}>
-        <Text style={styles.title}>{item.title || "Sin título"}</Text>
+        <Text style={styles.title}>{item.title || item.titulo || item.name || "Sin título"}</Text>
         <Text style={styles.plot} numberOfLines={3}>
           {item.fullplot || "Sin descripción"}
         </Text>
@@ -95,8 +158,12 @@ export default function App() {
                     <Text>No Image</Text>
                   </View>
                 )}
-                <Text style={styles.modalTitle}>{selectedMovie.title || "Sin título"}</Text>
-                <Text style={styles.modalPlot}>{selectedMovie.fullplot || "Sin descripción"}</Text>
+                <Text style={styles.modalTitle}>
+                  {selectedMovie.title || selectedMovie.titulo || "Sin título"}
+                </Text>
+                <Text style={styles.modalPlot}>
+                  {selectedMovie.fullplot || "Sin descripción"}
+                </Text>
                 
                 <TouchableOpacity 
                   style={styles.closeButton} 
@@ -114,6 +181,62 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  // Estilos del Login
+  loginContainer: {
+    flex: 1,
+    backgroundColor: '#0446ed',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loginCard: {
+    width: '85%',
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+  },
+  loginTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+  },
+  input: {
+    width: '100%',
+    height: 50,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    fontSize: 16,
+    color: '#333',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 15,
+    fontSize: 14,
+  },
+  loginButton: {
+    width: '100%',
+    backgroundColor: '#0446ed',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  loginButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+
+  // Estilos de la App (Películas)
   container: {
     flex: 1,
     paddingTop: 40,
@@ -161,6 +284,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "gray",
   },
+
   // Estilos del Modal
   modalOverlay: {
     flex: 1,
@@ -176,10 +300,6 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
   },
   modalPoster: {
     width: 200,
