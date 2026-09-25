@@ -2,8 +2,8 @@
 
 Bienvenido al índice de proyectos de este repositorio. Aquí encontrarás la lista de todos los trabajos y documentaciones subidas en formato Markdown, organizadas para su fácil navegación.
 
-| 📂 Proyecto | | 🔗 Enlace al archivo |
-| :--- | :--- | :--- |
+| 📂 Proyecto | 🔗 Enlace al archivo |
+| :--- | :--- |
 | **1. Ejercicio_01** | [Ver Proyecto](Parcial/Ejercicio_01) |
 | **2. Ejemplo_02** | [Ver Proyecto](Parcial/Ejemplo_02) |
 | **3. Ejercicio_03** | [Ver Proyecto](Parcial/Ejercicio_03) |
