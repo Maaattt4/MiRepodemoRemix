@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:gravity="center">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="TextView" />
+
+    <EditText
+        android:layout_width="139dp"
+        android:layout_height="48dp"
+        android:hint="Primer número"
+        android:inputType="numberDecimal" />
+
+    <EditText
+        android:id="@+id/etNumero2"
+        android:layout_width="142dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="Segundo número"
+        android:inputType="numberDecimal" />
+
+    <Button
+        android:id="@+id/btnSumar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sumar"
+        android:layout_marginTop="20dp" />
+
+    <TextView
+        android:id="@+id/tvResultado"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Resultado: 0"
+        android:textSize="24sp"
+        android:layout_marginTop="20dp" />
+
+</LinearLayout>
