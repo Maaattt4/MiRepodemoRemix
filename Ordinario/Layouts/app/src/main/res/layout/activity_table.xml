@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    android:stretchColumns="1"> <!-- Expande la columna 1 (segunda columna) -->
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Formulario con TableLayout"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- Fila 1 -->
+    <TableRow android:layout_marginBottom="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre:"
+            android:textStyle="bold"
+            android:paddingEnd="10dp"
+            android:gravity="end|center_vertical"/>
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Ingresa tu nombre"
+            android:background="#F0F0F0"
+            android:padding="8dp"/>
+    </TableRow>
+
+    <!-- Fila 2 -->
+    <TableRow android:layout_marginBottom="20dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edad:"
+            android:textStyle="bold"
+            android:paddingEnd="10dp"
+            android:gravity="end|center_vertical"/>
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="Ingresa tu edad"
+            android:inputType="number"
+            android:background="#F0F0F0"
+            android:padding="8dp"/>
+    </TableRow>
+
+    <!-- Fila 3 (Botón que ocupa ambas columnas) -->
+    <TableRow>
+        <Button
+            android:id="@+id/btnEnviar"
+            android:layout_span="2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Enviar Datos" />
+    </TableRow>
+
+</TableLayout>

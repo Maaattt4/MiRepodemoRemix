@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <!-- Elemento Central -->
+    <TextView
+        android:id="@+id/tvCentro"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Estoy en el CENTRO EXACTO"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:padding="16dp"
+        android:background="#E0E0E0"/>
+
+    <!-- Elemento Arriba del centro -->
+    <Button
+        android:id="@+id/btnArriba"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/tvCentro"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:text="Arriba del centro" />
+
+    <!-- Elemento Abajo del centro -->
+    <Button
+        android:id="@+id/btnAbajo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvCentro"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="Abajo del centro" />
+
+</RelativeLayout>
