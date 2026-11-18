@@ -2,17 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="12dp"
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginVertical="4dp"
+    android:background="@drawable/bg_glass_card"
+    android:clickable="true"
+    android:elevation="3dp"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
     android:gravity="center_vertical"
-    android:background="?android:attr/selectableItemBackground"
-    android:clickable="true">
+    android:orientation="horizontal"
+    android:padding="12dp">
 
     <ImageView
         android:id="@+id/ivAvatarContacto"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="#E0E0E0"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
         android:scaleType="centerCrop" />
 
     <TextView
@@ -20,9 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:text="Nombre de Usuario"
-        android:textColor="#000000"
-        android:textSize="18sp"
+        android:textColor="@color/aero_navy"
+        android:textSize="17sp"
         android:textStyle="bold" />
-
 </LinearLayout>

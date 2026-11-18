@@ -21,6 +21,7 @@ public class RegisterActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        Ventana.aplicarInsets(this);
 
         etCorreo = findViewById(R.id.etRegCorreo);
         etPass1 = findViewById(R.id.etRegPassword1);

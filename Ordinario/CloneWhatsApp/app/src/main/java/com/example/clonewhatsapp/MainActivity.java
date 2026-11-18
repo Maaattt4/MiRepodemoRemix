@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Ventana.aplicarInsets(this);
 
         SharedPreferences prefs = getSharedPreferences("WhatsAppClonePrefs", Context.MODE_PRIVATE);
         String token = prefs.getString("ACCESS_TOKEN", null);
@@ -35,8 +36,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (token != null && userId != null) {
             Toast.makeText(this, "Sesión activa...", Toast.LENGTH_SHORT).show();
-            // Al abrir la app, verificamos si ya configuró su perfil
-            verificarSiEsUsuarioNuevo(token, userId);
+            new Thread(() -> {
+                Http.refrescar();
+                verificarSiEsUsuarioNuevo(Http.token(token), userId);
+            }).start();
         }
 
         etCorreo = findViewById(R.id.etCorreo);
@@ -102,7 +105,11 @@ public class MainActivity extends AppCompatActivity {
                     String userId = jsonObject.getJSONObject("user").getString("id");
 
                     SharedPreferences prefs = getSharedPreferences("WhatsAppClonePrefs", Context.MODE_PRIVATE);
-                    prefs.edit().putString("ACCESS_TOKEN", accessToken).putString("USER_ID", userId).apply();
+                    prefs.edit()
+                            .putString("ACCESS_TOKEN", accessToken)
+                            .putString("REFRESH_TOKEN", jsonObject.optString("refresh_token", ""))
+                            .putString("USER_ID", userId)
+                            .apply();
 
                     runOnUiThread(() -> Toast.makeText(MainActivity.this, "¡Inicio exitoso!", Toast.LENGTH_SHORT).show());
 
@@ -173,6 +180,9 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(intent);
                         finish();
                     });
+                } else if (responseCode == 401) {
+                    getSharedPreferences("WhatsAppClonePrefs", Context.MODE_PRIVATE).edit().clear().apply();
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "Sesión expirada, inicia sesión de nuevo", Toast.LENGTH_LONG).show());
                 }
             } catch (Exception e) {
                 runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error verificando perfil", Toast.LENGTH_SHORT).show());

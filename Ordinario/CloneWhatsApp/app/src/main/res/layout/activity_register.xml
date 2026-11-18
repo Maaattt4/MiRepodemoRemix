@@ -1,57 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="30dp"
-    android:gravity="center"
-    android:background="#f5f5f5">
+    android:fillViewport="true"
+    android:scrollbars="none">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Crear Nueva Cuenta"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#333"
-        android:layout_marginBottom="30dp"/>
-
-    <EditText
-        android:id="@+id/etRegCorreo"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Correo electrónico"
-        android:inputType="textEmailAddress"
-        android:padding="12dp"
-        android:background="#fff"
-        android:layout_marginBottom="15dp"/>
+        android:gravity="center"
+        android:minHeight="480dp"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <EditText
-        android:id="@+id/etRegPassword1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Contraseña"
-        android:inputType="textPassword"
-        android:padding="12dp"
-        android:background="#fff"
-        android:layout_marginBottom="15dp"/>
+        <TextView
+            style="@style/Aero.Titulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="Crear nueva cuenta"
+            android:textSize="28sp" />
 
-    <EditText
-        android:id="@+id/etRegPassword2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Confirmar Contraseña"
-        android:inputType="textPassword"
-        android:padding="12dp"
-        android:background="#fff"
-        android:layout_marginBottom="25dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_glass_card"
+            android:elevation="6dp"
+            android:orientation="vertical"
+            android:padding="22dp">
 
-    <Button
-        android:id="@+id/btnCrearCuenta"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Registrarme"
-        android:padding="12dp"
-        android:backgroundTint="#25D366"/>
+            <EditText
+                android:id="@+id/etRegCorreo"
+                style="@style/Aero.Input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:hint="Correo electrónico"
+                android:inputType="textEmailAddress" />
 
-</LinearLayout>
+            <EditText
+                android:id="@+id/etRegPassword1"
+                style="@style/Aero.Input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:hint="Contraseña"
+                android:inputType="textPassword" />
+
+            <EditText
+                android:id="@+id/etRegPassword2"
+                style="@style/Aero.Input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="22dp"
+                android:hint="Confirmar contraseña"
+                android:inputType="textPassword" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnCrearCuenta"
+                style="@style/Widget.Aero.Button.Verde"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Registrarme" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

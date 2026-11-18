@@ -1,53 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="30dp"
-    android:gravity="center"
-    android:background="#f5f5f5">
+    android:fillViewport="true"
+    android:scrollbars="none">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Configura tu Perfil"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#333"
-        android:layout_marginBottom="30dp"/>
-
-    <ImageView
-        android:id="@+id/ivFotoPerfil"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@mipmap/ic_launcher_round"
-        android:background="#E0E0E0"
-        android:layout_marginBottom="15dp"/>
-
-    <Button
-        android:id="@+id/btnSeleccionarFoto"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Elegir Fotografía"
-        android:backgroundTint="#34B7F1"
-        android:layout_marginBottom="25dp"/>
-
-    <EditText
-        android:id="@+id/etNombreUsuario"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Ingresa tu nombre"
-        android:inputType="textPersonName"
-        android:padding="12dp"
-        android:background="#fff"
-        android:layout_marginBottom="25dp"/>
+        android:gravity="center"
+        android:minHeight="480dp"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <Button
-        android:id="@+id/btnGuardarPerfil"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Guardar Perfil"
-        android:padding="12dp"
-        android:backgroundTint="#25D366"/>
+        <TextView
+            style="@style/Aero.Titulo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="Configura tu perfil"
+            android:textSize="28sp" />
 
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_glass_card"
+            android:elevation="6dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:padding="22dp">
+
+            <ImageView
+                android:id="@+id/ivFotoPerfil"
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_avatar"
+                android:clipToOutline="true"
+                android:elevation="4dp"
+                android:padding="3dp"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/ic_launcher_round" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSeleccionarFoto"
+                style="@style/Widget.Aero.Button.Glass"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="18dp"
+                android:text="Elegir fotografía" />
+
+            <EditText
+                android:id="@+id/etNombreUsuario"
+                style="@style/Aero.Input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="22dp"
+                android:hint="Ingresa tu nombre"
+                android:inputType="textPersonName" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGuardarPerfil"
+                style="@style/Widget.Aero.Button.Verde"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Guardar perfil" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

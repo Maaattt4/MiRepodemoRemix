@@ -1,31 +1,37 @@
 package com.example.clonewhatsapp;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChatActivity extends AppCompatActivity {
 
     private RecyclerView rvMensajes;
     private EditText etEscribirMensaje;
-    private Button btnEnviar; // Cambiado a Button para coincidir con tu XML
-    private TextView tvNombreDestino;
+    private Button btnEnviar;
 
     private MensajeAdapter adapter;
     private List<Mensaje> listaMensajes;
@@ -33,68 +39,105 @@ public class ChatActivity extends AppCompatActivity {
     private String idConversacion;
     private String miUsuarioId;
     private String miToken;
+    private int firmaMensajes = -1;
 
-    private android.os.Handler handler = new android.os.Handler();
+    private final android.os.Handler handler = new android.os.Handler();
     private Runnable actualizadorDeMensajes;
 
-    private final String SUPABASE_URL = "https://azbyrfczkruskdbkrwcn.supabase.co";
-    private final String SUPABASE_KEY = "sb_publishable_KcER3YV1UhdIOC_Qq8HGcQ_-lUb7D78";
+    private Uri camaraUri;
+
+    private final ActivityResultLauncher<String> galeria = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> { if (uri != null) enviarImagen(uri); });
+
+    private final ActivityResultLauncher<Uri> camara = registerForActivityResult(
+            new ActivityResultContracts.TakePicture(),
+            ok -> { if (ok && camaraUri != null) enviarImagen(camaraUri); });
+
+    private final ActivityResultLauncher<String> permisoCamara = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            ok -> {
+                if (ok) abrirCamara();
+                else Toast.makeText(this, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show();
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+        Ventana.aplicarInsets(this);
 
-        // 1. Enlazar vistas
-        tvNombreDestino = findViewById(R.id.tvNombreDestino);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> finish());
+
         rvMensajes = findViewById(R.id.rvMensajes);
         etEscribirMensaje = findViewById(R.id.etEscribirMensaje);
         btnEnviar = findViewById(R.id.btnEnviar);
 
-        TextView btnRegresar = findViewById(R.id.btnRegresar);
-        btnRegresar.setOnClickListener(v -> finish());
-
-        // 2. Obtener datos de SharedPreferences y del Intent
         SharedPreferences prefs = getSharedPreferences("WhatsAppClonePrefs", Context.MODE_PRIVATE);
         miToken = prefs.getString("ACCESS_TOKEN", "");
         miUsuarioId = prefs.getString("USER_ID", "");
 
         idConversacion = getIntent().getStringExtra("ID_CONVERSACION");
         String nombreDestino = getIntent().getStringExtra("NOMBRE_DESTINATARIO");
+        setTitle(nombreDestino != null ? nombreDestino : "Chat");
 
-        tvNombreDestino.setText(nombreDestino != null ? nombreDestino : "Chat");
-
-        // 3. Configurar RecyclerView
         listaMensajes = new ArrayList<>();
         rvMensajes.setLayoutManager(new LinearLayoutManager(this));
         adapter = new MensajeAdapter(listaMensajes, miUsuarioId);
+        adapter.setOnMensajeLongClick(this::confirmarEliminar);
         rvMensajes.setAdapter(adapter);
-
-        // 4. Configurar el botón de enviar
-        btnEnviar.setOnClickListener(v -> {
-            String textoMensaje = etEscribirMensaje.getText().toString().trim();
-            if (!textoMensaje.isEmpty()) {
-                enviarMensajeBaseDatos(textoMensaje);
-                etEscribirMensaje.setText(""); // Limpiar la caja de texto
+        rvMensajes.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            if (b < ob && adapter.getItemCount() > 0) {
+                rvMensajes.post(() -> rvMensajes.scrollToPosition(adapter.getItemCount() - 1));
             }
         });
 
-        // 5. Descargar los mensajes antiguos
+        findViewById(R.id.btnAdjuntar).setOnClickListener(v -> mostrarOpcionesAdjuntar());
+
+        btnEnviar.setOnClickListener(v -> {
+            String textoMensaje = etEscribirMensaje.getText().toString().trim();
+            if (!textoMensaje.isEmpty()) {
+                enviarMensajeBaseDatos(textoMensaje, "texto");
+                etEscribirMensaje.setText("");
+            }
+        });
+
+        cargarInfoConversacion();
         obtenerMensajes();
-        // 6. Configurar la actualización automática (Polling) cada 3 segundos
         actualizadorDeMensajes = new Runnable() {
             @Override
             public void run() {
-                obtenerMensajes(); // Descarga los mensajes
-                handler.postDelayed(this, 3000); // Se vuelve a ejecutar en 3 segundos
+                obtenerMensajes();
+                handler.postDelayed(this, 3000);
             }
         };
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_chat, menu);
+        SearchView sv = (SearchView) menu.findItem(R.id.action_buscar).getActionView();
+        sv.setQueryHint("Buscar mensajes...");
+        sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.filtrar(newText);
+                return true;
+            }
+        });
+        return true;
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        // Iniciar el actualizador cuando la pantalla está visible
         if (actualizadorDeMensajes != null) {
             handler.postDelayed(actualizadorDeMensajes, 3000);
         }
@@ -103,49 +146,124 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        // Detener el actualizador si el usuario sale de la pantalla
         if (actualizadorDeMensajes != null) {
             handler.removeCallbacks(actualizadorDeMensajes);
         }
     }
 
-    private void enviarMensajeBaseDatos(String texto) {
+    private int firma(List<Mensaje> l) {
+        int eliminados = 0;
+        for (Mensaje m : l) if (m.isEliminado()) eliminados++;
+        return l.size() * 100003 + eliminados;
+    }
+
+    private void cargarInfoConversacion() {
         new Thread(() -> {
             try {
-                URL url = new URL(SUPABASE_URL + "/rest/v1/messages");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("apikey", SUPABASE_KEY);
-                conn.setRequestProperty("Authorization", "Bearer " + miToken);
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setDoOutput(true);
+                JSONArray a = new JSONArray(Http.call("GET",
+                        "/rest/v1/conversaciones?id=eq." + idConversacion + "&select=es_grupo,is_group,name", miToken, null));
+                if (a.length() == 0) return;
+                JSONObject c = a.getJSONObject(0);
+                if (!c.optBoolean("es_grupo", false) && !c.optBoolean("is_group", false)) return;
+                String nombreGrupo = c.isNull("name") ? null : c.getString("name");
 
-                // Construimos el JSON para insertar en la tabla messages
-                String jsonBody = "{"
-                        + "\"conversacion_id\":\"" + idConversacion + "\","
-                        + "\"sender_id\":\"" + miUsuarioId + "\","
-                        + "\"content\":\"" + texto + "\""
-                        + "}";
-
-                OutputStream os = conn.getOutputStream();
-                os.write(jsonBody.getBytes("UTF-8"));
-                os.close();
-
-                int responseCode = conn.getResponseCode();
-
-                if (responseCode == 201 || responseCode == 200) {
-                    // Si se envió correctamente a la BD, lo agregamos a la pantalla localmente
-                    runOnUiThread(() -> {
-                        listaMensajes.add(new Mensaje(miUsuarioId, texto));
-                        adapter.notifyItemInserted(listaMensajes.size() - 1);
-                        rvMensajes.scrollToPosition(listaMensajes.size() - 1);
-                    });
-                } else {
-                    runOnUiThread(() -> Toast.makeText(ChatActivity.this, "Error al enviar: " + responseCode, Toast.LENGTH_SHORT).show());
+                JSONArray ps = new JSONArray(Http.call("GET", "/rest/v1/profiles?select=id,username", miToken, null));
+                Map<String, String> nombres = new HashMap<>();
+                for (int i = 0; i < ps.length(); i++) {
+                    JSONObject p = ps.getJSONObject(i);
+                    nombres.put(p.optString("id", ""), p.optString("username", "Usuario"));
                 }
+                runOnUiThread(() -> {
+                    if (nombreGrupo != null) setTitle(nombreGrupo);
+                    adapter.setGrupo(true, nombres);
+                });
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(ChatActivity.this, "Error de red", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
+    private void mostrarOpcionesAdjuntar() {
+        new MaterialAlertDialogBuilder(this)
+                .setItems(new String[]{"Galería", "Cámara"}, (d, i) -> {
+                    if (i == 0) {
+                        galeria.launch("image/*");
+                    } else if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        abrirCamara();
+                    } else {
+                        permisoCamara.launch(Manifest.permission.CAMERA);
+                    }
+                })
+                .show();
+    }
+
+    private void abrirCamara() {
+        try {
+            File dir = new File(getCacheDir(), "images");
+            dir.mkdirs();
+            File f = File.createTempFile("cam_", ".jpg", dir);
+            camaraUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", f);
+            camara.launch(camaraUri);
+        } catch (Exception e) {
+            Toast.makeText(this, "No se pudo abrir la cámara", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void enviarImagen(Uri uri) {
+        new Thread(() -> {
+            try {
+                byte[] bytes = ImagenUtil.comprimir(this, uri, 1280);
+                String url = ImagenUtil.subir(miToken, "chat_images", miUsuarioId, bytes);
+                enviarMensajeBaseDatos(url, "imagen");
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this, "Error al enviar imagen: " + e.getMessage(), Toast.LENGTH_LONG).show());
+            }
+        }).start();
+    }
+
+    private void enviarMensajeBaseDatos(String texto, String tipo) {
+        new Thread(() -> {
+            try {
+                JSONObject o = new JSONObject()
+                        .put("conversacion_id", idConversacion)
+                        .put("sender_id", miUsuarioId)
+                        .put("content", texto);
+                if (!"texto".equals(tipo)) o.put("tipo_mensaje", tipo);
+                Http.enviar("POST", "/rest/v1/messages", miToken, o.toString());
+                runOnUiThread(() -> {
+                    firmaMensajes = -1;
+                    obtenerMensajes();
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                String m = String.valueOf(e.getMessage());
+                runOnUiThread(() -> Toast.makeText(this, "Error al enviar: " + (m.length() > 160 ? m.substring(0, 160) : m), Toast.LENGTH_LONG).show());
+            }
+        }).start();
+    }
+
+    private void confirmarEliminar(Mensaje m) {
+        new MaterialAlertDialogBuilder(this)
+                .setMessage("¿Eliminar este mensaje?")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Eliminar", (d, w) -> eliminarMensaje(m))
+                .show();
+    }
+
+    private void eliminarMensaje(Mensaje m) {
+        new Thread(() -> {
+            try {
+                String res = Http.call("PATCH",
+                        "/rest/v1/messages?id=eq." + m.getId() + "&sender_id=eq." + miUsuarioId,
+                        miToken, "{\"eliminado\":true}").trim();
+                if (res.isEmpty() || new JSONArray(res).length() == 0) throw new Exception("sin permiso");
+                runOnUiThread(() -> {
+                    m.setEliminado(true);
+                    firmaMensajes = firma(listaMensajes);
+                    adapter.actualizar();
+                });
+            } catch (Exception e) {
+                runOnUiThread(() -> Toast.makeText(this, "No se pudo eliminar", Toast.LENGTH_SHORT).show());
             }
         }).start();
     }
@@ -153,52 +271,33 @@ public class ChatActivity extends AppCompatActivity {
     private void obtenerMensajes() {
         new Thread(() -> {
             try {
-                // Pedimos los mensajes de esta conversación ordenados por fecha de creación (los más antiguos primero)
-                URL url = new URL(SUPABASE_URL + "/rest/v1/messages?conversacion_id=eq." + idConversacion + "&select=*&order=created_at.asc");
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("GET");
-                conn.setRequestProperty("apikey", SUPABASE_KEY);
-                conn.setRequestProperty("Authorization", "Bearer " + miToken);
-
-                int responseCode = conn.getResponseCode();
-
-                if (responseCode == 200) {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        response.append(line);
-                    }
-                    reader.close();
-
-                    org.json.JSONArray jsonArray = new org.json.JSONArray(response.toString());
-
-                    runOnUiThread(() -> {
-                        try {
-                            // Solo actualizamos si la cantidad de mensajes descargados es diferente a los que ya tenemos
-                            if (jsonArray.length() != listaMensajes.size()) {
-                                listaMensajes.clear();
-                                for (int i = 0; i < jsonArray.length(); i++) {
-                                    org.json.JSONObject msgJson = jsonArray.getJSONObject(i);
-                                    String senderId = msgJson.optString("sender_id", "");
-                                    String content = msgJson.optString("content", "");
-
-                                    listaMensajes.add(new Mensaje(senderId, content));
-                                }
-                                adapter.notifyDataSetChanged();
-
-                                if (!listaMensajes.isEmpty()) {
-                                    rvMensajes.scrollToPosition(listaMensajes.size() - 1);
-                                }
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
+                JSONArray arr = new JSONArray(Http.call("GET",
+                        "/rest/v1/messages?conversacion_id=eq." + idConversacion + "&select=*&order=created_at.asc",
+                        miToken, null));
+                List<Mensaje> nuevos = new ArrayList<>();
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject o = arr.getJSONObject(i);
+                    nuevos.add(new Mensaje(
+                            o.optString("id", null),
+                            o.optString("sender_id", ""),
+                            o.optString("content", ""),
+                            o.optString("tipo_mensaje", "texto"),
+                            o.optBoolean("eliminado", false)));
                 }
+                runOnUiThread(() -> {
+                    int f = firma(nuevos);
+                    if (f == firmaMensajes) return;
+                    boolean hayNuevos = nuevos.size() != listaMensajes.size();
+                    firmaMensajes = f;
+                    listaMensajes.clear();
+                    listaMensajes.addAll(nuevos);
+                    adapter.actualizar();
+                    if (hayNuevos && adapter.getItemCount() > 0) {
+                        rvMensajes.scrollToPosition(adapter.getItemCount() - 1);
+                    }
+                });
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(ChatActivity.this, "Error al cargar historial", Toast.LENGTH_SHORT).show());
             }
         }).start();
     }

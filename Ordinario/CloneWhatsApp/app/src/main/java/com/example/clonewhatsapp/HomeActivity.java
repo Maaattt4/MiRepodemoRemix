@@ -37,6 +37,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        Ventana.aplicarInsets(this);
 
         // --- CÓDIGO CORREGIDO: Revisar si venimos de una notificación ---
         if (getIntent() != null && getIntent().hasExtra("conversacion_id")) {
@@ -61,6 +62,13 @@ public class HomeActivity extends AppCompatActivity {
 
         // 3. Crear el adaptador UNA SOLA VEZ con la función de Supabase
         adapter = new ContactoAdapter(listaContactos, contacto -> {
+            if (contacto.esGrupo()) {
+                Intent i = new Intent(HomeActivity.this, ChatActivity.class);
+                i.putExtra("ID_CONVERSACION", contacto.getId());
+                i.putExtra("NOMBRE_DESTINATARIO", contacto.getUsername());
+                startActivity(i);
+                return;
+            }
             Toast.makeText(HomeActivity.this, "Conectando con: " + contacto.getUsername(), Toast.LENGTH_SHORT).show();
             iniciarConversacion(contacto.getId(), contacto.getUsername(), miToken);
         });
@@ -94,8 +102,8 @@ public class HomeActivity extends AppCompatActivity {
             finish();
         });
 
-        // 7. Descargar los perfiles de Supabase
-        obtenerContactos();
+        findViewById(R.id.fabNuevoGrupo).setOnClickListener(v ->
+                startActivity(new Intent(HomeActivity.this, CrearGrupoActivity.class)));
 
         // Pedir FCM Token de Firebase
         com.google.firebase.messaging.FirebaseMessaging.getInstance().getToken()
@@ -109,6 +117,26 @@ public class HomeActivity extends AppCompatActivity {
                     // Guardarlo en Supabase
                     guardarTokenEnSupabase(token);
                 });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        obtenerContactos();
+    }
+
+    private List<Contacto> cargarGrupos(String token) {
+        List<Contacto> grupos = new ArrayList<>();
+        try {
+            JSONArray a = new JSONArray(Http.call("GET", "/rest/v1/conversaciones?es_grupo=eq.true&select=id,name", token, null));
+            for (int i = 0; i < a.length(); i++) {
+                JSONObject g = a.getJSONObject(i);
+                String n = g.isNull("name") ? "Grupo" : g.getString("name");
+                grupos.add(new Contacto(g.getString("id"), n, "", true));
+            }
+        } catch (Exception ignored) {
+        }
+        return grupos;
     }
 
     private void filtrar(String texto) {
@@ -145,7 +173,7 @@ public class HomeActivity extends AppCompatActivity {
                     reader.close();
 
                     JSONArray jsonArray = new JSONArray(response.toString());
-                    listaContactos.clear();
+                    List<Contacto> nuevos = cargarGrupos(token);
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject perfil = jsonArray.getJSONObject(i);
@@ -153,10 +181,14 @@ public class HomeActivity extends AppCompatActivity {
                         String username = perfil.optString("username", "Sin nombre");
                         String avatarUrl = perfil.optString("avatar_url", "");
 
-                        listaContactos.add(new Contacto(id, username, avatarUrl));
+                        nuevos.add(new Contacto(id, username, avatarUrl));
                     }
 
-                    runOnUiThread(() -> adapter.notifyDataSetChanged());
+                    runOnUiThread(() -> {
+                        listaContactos.clear();
+                        listaContactos.addAll(nuevos);
+                        filtrar(etBuscarUsuario.getText().toString());
+                    });
                 } else {
                     runOnUiThread(() -> Toast.makeText(this, "Error al cargar contactos: " + responseCode, Toast.LENGTH_SHORT).show());
                 }

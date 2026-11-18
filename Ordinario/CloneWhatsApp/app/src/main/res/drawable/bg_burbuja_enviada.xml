@@ -1,9 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#DCF8C6"/> <!-- Verde WhatsApp -->
-    <corners
-        android:topLeftRadius="12dp"
-        android:topRightRadius="12dp"
-        android:bottomLeftRadius="12dp"
-        android:bottomRightRadius="0dp"/> <!-- Esquina inferior derecha en punta -->
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <gradient
+                android:angle="270"
+                android:endColor="#FF8FE3F7"
+                android:startColor="#FFD2F8FF" />
+            <corners
+                android:topLeftRadius="18dp"
+                android:topRightRadius="18dp"
+                android:bottomLeftRadius="18dp"
+                android:bottomRightRadius="4dp" />
+            <stroke
+                android:width="1dp"
+                android:color="#99FFFFFF" />
+        </shape>
+    </item>
+    <item
+        android:left="6dp"
+        android:right="6dp"
+        android:top="2dp"
+        android:height="12dp"
+        android:gravity="top">
+        <shape>
+            <gradient
+                android:angle="270"
+                android:endColor="#00FFFFFF"
+                android:startColor="#99FFFFFF" />
+            <corners android:radius="10dp" />
+        </shape>
+    </item>
+</layer-list>

@@ -41,6 +41,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        Ventana.aplicarInsets(this);
 
         ivFotoPerfil = findViewById(R.id.ivFotoPerfil);
         btnSeleccionarFoto = findViewById(R.id.btnSeleccionarFoto);
@@ -88,43 +89,10 @@ public class ProfileActivity extends AppCompatActivity {
                 runOnUiThread(() -> Toast.makeText(this, "Subiendo foto...", Toast.LENGTH_SHORT).show());
 
                 // 2. Leer la imagen seleccionada y convertirla a bytes
-                InputStream is = getContentResolver().openInputStream(imagenUri);
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                int nRead;
-                byte[] data = new byte[16384];
-                while ((nRead = is.read(data, 0, data.length)) != -1) {
-                    buffer.write(data, 0, nRead);
-                }
-                byte[] imagenBytes = buffer.toByteArray();
-
-                // 3. Crear un nombre único para la imagen
-                String nombreArchivo = UUID.randomUUID().toString() + ".jpg";
-
-                // 4. Subir imagen al Storage de Supabase (Bucket 'avatars')
-                URL urlUpload = new URL(SUPABASE_URL + "/storage/v1/object/avatars/" + nombreArchivo);
-                HttpURLConnection connUpload = (HttpURLConnection) urlUpload.openConnection();
-                connUpload.setRequestMethod("POST");
-                connUpload.setRequestProperty("apikey", SUPABASE_KEY);
-                connUpload.setRequestProperty("Authorization", "Bearer " + token);
-                connUpload.setRequestProperty("Content-Type", "image/jpeg");
-                connUpload.setDoOutput(true);
-
-                OutputStream osUpload = connUpload.getOutputStream();
-                osUpload.write(imagenBytes);
-                osUpload.flush();
-                osUpload.close();
-
-                int uploadResponse = connUpload.getResponseCode();
-
-                if (uploadResponse == 200) {
-                    // Si la imagen subió bien, obtenemos su URL pública
-                    String fotoUrl = SUPABASE_URL + "/storage/v1/object/public/avatars/" + nombreArchivo;
-
-                    // 5. Guardar el nombre y la foto en la tabla 'profiles'
-                    guardarEnBaseDeDatos(nombre, fotoUrl, token);
-                } else {
-                    runOnUiThread(() -> Toast.makeText(this, "Error al subir foto: " + uploadResponse, Toast.LENGTH_LONG).show());
-                }
+                String userId = prefs.getString("USER_ID", "");
+                byte[] imagenBytes = ImagenUtil.comprimir(this, imagenUri, 512);
+                String fotoUrl = ImagenUtil.subir(token, "avatars", userId, imagenBytes);
+                guardarEnBaseDeDatos(nombre, fotoUrl, token);
 
             } catch (Exception e) {
                 runOnUiThread(() -> Toast.makeText(this, "Error de red: " + e.getMessage(), Toast.LENGTH_LONG).show());
@@ -135,7 +103,7 @@ public class ProfileActivity extends AppCompatActivity {
     private void guardarEnBaseDeDatos(String nombre, String fotoUrl, String token) {
         try {
             // Petición a la tabla 'profiles'
-            URL urlDb = new URL(SUPABASE_URL + "/rest/v1/profiles");
+            URL urlDb = new URL(SUPABASE_URL + "/rest/v1/profiles?on_conflict=id");
             HttpURLConnection connDb = (HttpURLConnection) urlDb.openConnection();
             connDb.setRequestMethod("POST");
             connDb.setRequestProperty("apikey", SUPABASE_KEY);
@@ -145,9 +113,14 @@ public class ProfileActivity extends AppCompatActivity {
             connDb.setDoOutput(true);
 
             // Crear el JSON con el nombre y la foto
-            String jsonBody = "{\"username\":\"" + nombre + "\", \"avatar_url\":\"" + fotoUrl + "\"}";
+            String userId = getSharedPreferences("WhatsAppClonePrefs", Context.MODE_PRIVATE).getString("USER_ID", "");
+            String jsonBody = new org.json.JSONObject()
+                    .put("id", userId)
+                    .put("username", nombre)
+                    .put("avatar_url", fotoUrl)
+                    .toString();
             OutputStream osDb = connDb.getOutputStream();
-            osDb.write(jsonBody.getBytes());
+            osDb.write(jsonBody.getBytes("UTF-8"));
             osDb.flush();
             osDb.close();
 

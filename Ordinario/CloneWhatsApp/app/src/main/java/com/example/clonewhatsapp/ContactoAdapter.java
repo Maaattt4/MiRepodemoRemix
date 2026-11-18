@@ -37,7 +37,7 @@ public class ContactoAdapter extends RecyclerView.Adapter<ContactoAdapter.Contac
     @Override
     public void onBindViewHolder(@NonNull ContactoViewHolder holder, int position) {
         Contacto contacto = listaContactos.get(position);
-        holder.tvNombre.setText(contacto.getUsername());
+        holder.tvNombre.setText(contacto.esGrupo() ? "👥 " + contacto.getUsername() : contacto.getUsername());
 
         Glide.with(holder.itemView.getContext())
                 .load(contacto.getAvatarUrl())

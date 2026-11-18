@@ -2,9 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
+        android:name=".App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -24,12 +28,29 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ProfileActivity" />
-
-        <!-- AGREGAR ESTA LÍNEA PARA TU NUEVA PANTALLA PRINCIPAL -->
+        <activity
+            android:name=".ProfileActivity"
+            android:windowSoftInputMode="adjustResize" />
         <activity android:name=".HomeActivity" />
-        <activity android:name=".RegisterActivity" />
-        <activity android:name=".ChatActivity" />
+        <activity
+            android:name=".RegisterActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ChatActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".CrearGrupoActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <!-- Servicio de Firebase Cloud Messaging -->
         <service

@@ -2,4 +2,24 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="aero_sky_top">#FFBFEFFF</color>
+    <color name="aero_sky_mid">#FFE6FAFF</color>
+    <color name="aero_mint">#FFC9F7E4</color>
+
+    <color name="aero_cyan_light">#FF5BDCF5</color>
+    <color name="aero_cyan">#FF1FB5E0</color>
+    <color name="aero_blue">#FF0A8FC4</color>
+
+    <color name="aero_green_light">#FF7BE8BE</color>
+    <color name="aero_green">#FF3DD6A3</color>
+    <color name="aero_green_dark">#FF17A97A</color>
+
+    <color name="aero_glass">#B3FFFFFF</color>
+    <color name="aero_glass_strong">#E6FFFFFF</color>
+    <color name="aero_glass_border">#CCFFFFFF</color>
+    <color name="aero_gloss">#88FFFFFF</color>
+
+    <color name="aero_navy">#FF0B3954</color>
+    <color name="aero_navy_soft">#FF4F7A92</color>
 </resources>

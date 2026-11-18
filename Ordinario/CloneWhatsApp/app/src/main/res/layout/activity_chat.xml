@@ -1,67 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#E5DDD5">
+    android:orientation="vertical">
 
-    <!-- Encabezado con el botón regresar y nombre -->
-    <LinearLayout
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#075E54"
-        android:padding="15dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:layout_height="?attr/actionBarSize"
+        android:background="@drawable/bg_toolbar_aero"
+        android:elevation="8dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:navigationIcon="?attr/homeAsUpIndicator"
+        app:titleTextColor="@color/white" />
 
-        <TextView
-            android:id="@+id/btnRegresar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="←  "
-            android:textColor="#FFFFFF"
-            android:textSize="24sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvNombreDestino"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nombre Contacto"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold"/>
-    </LinearLayout>
-
-    <!-- Lista de mensajes (AQUÍ ESTÁ EL ID QUE FALTA) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvMensajes"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="10dp" />
+        android:clipToPadding="false"
+        android:paddingVertical="8dp" />
 
-    <!-- Zona para escribir y enviar (AQUÍ ESTÁN LOS OTROS DOS) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="10dp"
-        android:background="#FFFFFF">
+        android:padding="8dp">
 
-        <EditText
-            android:id="@+id/etEscribirMensaje"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Escribe un mensaje..."
-            android:background="@android:color/transparent"
-            android:padding="10dp"/>
+            android:background="@drawable/bg_input"
+            android:elevation="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="4dp"
+            android:paddingEnd="12dp">
 
-        <Button
+            <ImageButton
+                android:id="@+id/btnAdjuntar"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Adjuntar"
+                android:src="@android:drawable/ic_menu_camera"
+                app:tint="@color/aero_blue" />
+
+            <EditText
+                android:id="@+id/etEscribirMensaje"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:hint="Mensaje"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines="4"
+                android:minHeight="48dp"
+                android:paddingHorizontal="8dp"
+                android:textColor="@color/aero_navy"
+                android:textColorHint="@color/aero_navy_soft" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnEnviar"
+            style="@style/Widget.Aero.Button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:minHeight="48dp"
             android:text="Enviar" />
     </LinearLayout>
 </LinearLayout>
