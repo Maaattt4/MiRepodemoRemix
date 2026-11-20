@@ -19,5 +19,25 @@ Bienvenido al índice de proyectos de este repositorio. Aquí encontrarás la li
 | **13. Mapas** | [Ver Proyecto](Parcial/Mapas) |
 | **14. ConsumeAPI_MongoDB** | [Ver Proyecto](Parcial/ConsumeAPI_MongoDB) |
 
+### 📗 Ordinario
+
+| 📂 Proyecto | 🔗 Enlace al archivo |
+| :--- | :--- |
+| **1. Camara** | [Ver Proyecto](Ordinario/Camara) |
+| **2. CloneWhatsApp** | [Ver Proyecto](Ordinario/CloneWhatsApp) |
+| **3. CustomPassEmailRecovery** | [Ver Proyecto](Ordinario/CustomPassEmailRecovery) |
+| **4. DemoIntent** | [Ver Proyecto](Ordinario/DemoIntent) |
+| **5. DomineALL** | [Ver Proyecto](Ordinario/DomineALL) |
+| **6. Fragmentado** | [Ver Proyecto](Ordinario/Fragmentado) |
+| **7. Layouts** | [Ver Proyecto](Ordinario/Layouts) |
+| **8. Listas** | [Ver Proyecto](Ordinario/Listas) |
+| **9. Persistencia** | [Ver Proyecto](Ordinario/Persistencia) |
+| **10. PersistenciaAndorid** | [Ver Proyecto](Ordinario/PersistenciaAndorid) |
+| **11. SensoresyNavdrawe** | [Ver Proyecto](Ordinario/SensoresyNavdrawe) |
+| **12. VertHorizon** | [Ver Proyecto](Ordinario/VertHorizon) |
+
+---
+*📌 **Nota:** Para abrir cualquiera de los proyectos, simplemente haz clic en el enlace de la columna derecha.*
+
 ---
 *📌 **Nota:** Para abrir cualquiera de los proyectos, simplemente haz clic en el enlace de la columna derecha.*
